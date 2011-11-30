@@ -8,7 +8,7 @@ You place a 'build.json' file in your projects root directory, which may contain
 the following fields:
 
 	name		the name of your project
-	src-dir		path to the directory where the source files are placed
+	src-dir		path to the directory containing the source files
 	bin-dir		path to the directory where the output should be written
 	packages	your included packages (array of strings)
 	arguments	additional arguments passed to valac
