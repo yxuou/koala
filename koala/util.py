@@ -20,16 +20,16 @@ def list_files(directory, extension=None):
 				result.append(path)
 	return result
 
-def list_directories(directory, pattern=None):
-	if pattern != None:
-		regex = re.compile(pattern)
+def list_directories(directory, regex_pattern=None):
+	if regex_pattern != None:
+		regex = re.compile(regex_pattern)
 
 	result = []
 	for basename in os.listdir(directory):
 		path = os.path.join(directory, basename)
 
 		if os.path.isdir(path):
-			if pattern == None:
+			if regex_pattern == None:
 				result.append(path)
 			else:
 				if re.match(regex, basename) != None:

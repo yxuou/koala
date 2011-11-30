@@ -1,9 +1,7 @@
 import os
 
-from koala.util import list_files
 from koala.base import ReactiveObject
-
-from koala.compiler import ValaCompiler, MakefileCompiler
+from koala.util import list_files
 
 class Builder(ReactiveObject):
 
@@ -18,12 +16,13 @@ class Builder(ReactiveObject):
 		self.set_key("bin-dir", "./")
 		self.set_key("src-dir", "./")
 
-		self.compiler = None
-
 	def set_compiler (self, compiler):
 		self.compiler = compiler
 
 	def get_compiler (self):
+		if not hasattr(self, "compiler"):
+			raise NotImplementedError()
+
 		return self.compiler
 
 	def load_sources (self):
@@ -45,7 +44,7 @@ class Builder(ReactiveObject):
 			compiler = self.get_compiler()
 			compiler.run(self)
 		except Exception, e:
-			print "Error: Exception occured during compilation: %s." %(e)
+			print "Error: Exception occured during compilation:", str(e)
 
 		self.emit_signal("build-finished")
 

@@ -12,11 +12,12 @@
 # SOFTWARE.
 
 import os
+import sys
 import koala
 
 from koala.project import ProjectFile
 from koala.builder import Builder
-from koala.compiler import *
+from koala.compiler import ValaCompiler
 from koala.util import *
 
 def on_build_started(sender, udata=None):
@@ -33,9 +34,6 @@ if __name__ == "__main__":
 	builder = Builder()
 	builder.connect_signal("build-started", on_build_started)
 
-	compiler = ValaCompiler()
-	compiler.connect_signal("output-written", on_output_written)
-	
 	if os.path.exists("build.json"):
 		try:
 			project = ProjectFile()
@@ -44,16 +42,20 @@ if __name__ == "__main__":
 			print "Loading 'build.json' failed:", str(e)
 			exit(1)
 
+	compiler = ValaCompiler()
+	compiler.connect_signal("output-written", on_output_written)
+	
 	builder.set_compiler(compiler)
 	builder.build()
 	
 	messages = compiler.get_messages()
-	for type in messages.get_types():
-		print "\nGot the following %s(s):" %(type)
-		for message in messages.get_messages(type):
+	for message_type in messages.get_types():
+		print "\nGot the following %s(s):" %(message_type)
+		for message in messages.get_messages(message_type):
 			print " >", message
 
 	if compiler.has_errors():
-		print "\nCompilation failed."		
+		print "\nCompilation failed."
+		exit(1)	
 	else:
 		print "\nCompilation succeeded."

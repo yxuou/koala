@@ -9,8 +9,6 @@ class Compiler(ReactiveObject):
 	def __init__(self):
 		super(Compiler, self).__init__()
 
-		self.messages = None
-
 		self.register_signal("compilation-started")
 		self.register_signal("compilation-finished")
 		self.register_signal("output-written")
@@ -18,7 +16,7 @@ class Compiler(ReactiveObject):
 	def run(self, properties):
 		self.emit_signal("compilation-started")
 
-		if self.messages != None:
+		if hasattr(self, "messages"):
 			self.messages.clear_messages()
 
 		if hasattr(self, "do_run"):
@@ -29,7 +27,7 @@ class Compiler(ReactiveObject):
 		self.emit_signal("compilation-finished")
 
 	def get_messages(self):
-		if self.messages == None:
+		if not hasattr(self, "messages"):
 			raise NotImplementedError()
 
 		return self.messages
@@ -45,10 +43,11 @@ class CompilerMessages(ReactiveObject):
 		self.register_signal("message-found")
 
 	def add_message(self, type, message):
-		if not type in self:
-			self[type] = []
+		if type in self:
+			self[type].append(message)
+		else:
+			self[type] = [message]
 
-		self[type].append(message)
 		self.emit_signal("message-found", message, type)
 
 	def get_messages(self, type):
@@ -60,13 +59,13 @@ class CompilerMessages(ReactiveObject):
 	def get_types(self):
 		return self.__iter__()
 
-
 class ValaCompiler(Compiler):
 
 	translator = {
-		"name"     : lambda s : "--output=%s" %(s),
-		"bin-dir"  : lambda s : "--directory=%s" %(s),
-		"packages" : lambda l : ("--pkg=" + "\t--pkg=".join(l)).split('\t')
+		"name"      : lambda s : "--output=%s" %(s),
+		"bin-dir"   : lambda s : "--directory=%s" %(s),
+		"packages"  : lambda l : ("--pkg=" + "\t--pkg=".join(l)).split('\t'),
+		"arguments" : lambda l : l
 	}
 
 	def __init__(self):
@@ -98,6 +97,7 @@ class ValaCompiler(Compiler):
 
 	def do_run(self, properties):
 		call = self.get_call(properties)
+
 		proc = subprocess.Popen(call, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		proc.wait()
 
@@ -113,45 +113,6 @@ class ValaCompiler(Compiler):
 
 	def has_errors(self):
 		return self.errors
-
-class MakefileCompiler(ValaCompiler):
-	
-	def __init__(self):
-		super(MakefileCompiler, self).__init__()
-		self.messages = CompilerMessages()
-
-	def do_run(self, properties):
-		call = self.get_call(properties)
-
-		prog = call[0]
-		args = call[1:]
-
-		try:
-			file = open("Makefile", "w")
-
-			file.write("all:\n")
-			file.write("\t%s" %(prog))
-		
-			if len(args) > 0:
-				file.write(" \\")
-			file.write("\n")
-
-			for arg in args:
-				file.write("\t\t%s \\\n" %(arg))
-
-			file.close()
-
-		except IOError, e:
-			self.messages.add_message("error", "%s: %s" %(e.filename, e.strerror))
-			return
-		except Exception, e:
-			self.messages.add_message("error", e.__str__())
-			return
-
-		self.emit_signal("output-written", "Makefile")
-
-	def has_errors(self):
-		return len(self.messages) != 0
 
 class ValaCompilerMessages(CompilerMessages):
 
@@ -173,13 +134,13 @@ class ValaCompilerMessages(CompilerMessages):
 
 		# Skip first group of match.groups(), because it's just the combination 
 		# of the second and third group.
-		file, line, type, text  = match.groups()[1:]
+		msg_file, msg_line, msg_type, msg_text  = match.groups()[1:]
 
-		if file != None:
-			message = "%s.%s: %s" %(file, line, text)
+		if msg_file != None and msg_line != None:
+			message = "%s.%s: %s" %(msg_file, msg_line, msg_text)
 		else:
-			message = text
+			message = msg_text
 
-		self.add_message(type, message)
+		self.add_message(msg_type, message)
 
 
