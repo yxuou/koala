@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
 program = "koala"
-version = (0, 1, 0)
+version = (0, 1)
 
-experimental = True
+program_version = program.capitalize() + ", Version %d.%d." %version

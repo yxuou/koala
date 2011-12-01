@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #
 # Koala
+#   A small build tool for Vala projects.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
@@ -13,42 +14,23 @@
 
 import os
 import sys
+
 import koala
 
-from koala.project import ProjectFile
+from koala.project import Project
 from koala.builder import Builder
 from koala.compiler import ValaCompiler
 from koala.util import *
 
-def on_build_started(sender, udata=None):
-	print "Building %s from source(s):" %(builder["name"])
-	for file in builder["src-files"]:
+def on_build_started(builder, project, udata=None):
+	print "Building %s from source(s):" %(project["name"])
+	for file in project["src-files"]:
 		print " >", file
 
-def on_output_written(sender, output, udata=None):
-	print "%d bytes written to %s." %(os.path.getsize(output), output)
-
-if __name__ == "__main__":
-	print "%s %d.%d\n" %(koala.program.capitalize(), koala.version[0], koala.version[1])
-
-	builder = Builder()
-	builder.connect_signal("build-started", on_build_started)
-
-	if os.path.exists("build.json"):
-		try:
-			project = ProjectFile()
-			project.load_into(builder)
-		except Exception, e:
-			print "Loading 'build.json' failed:", str(e)
-			exit(1)
-
-	compiler = ValaCompiler()
-	compiler.connect_signal("output-written", on_output_written)
-	
-	builder.set_compiler(compiler)
-	builder.build()
-	
+def on_build_finished(builder, udata=None):
+	compiler = builder.get_compiler()
 	messages = compiler.get_messages()
+
 	for message_type in messages.get_types():
 		print "\nGot the following %s(s):" %(message_type)
 		for message in messages.get_messages(message_type):
@@ -59,3 +41,26 @@ if __name__ == "__main__":
 		exit(1)	
 	else:
 		print "\nCompilation succeeded."
+
+if __name__ == "__main__":
+	print "%s\n" %(koala.program_version)
+
+	builder = Builder()
+	builder.set_compiler(ValaCompiler())
+
+	builder.connect_signal("started", on_build_started)
+	builder.connect_signal("finished", on_build_finished)
+
+	project = Project()
+	if os.path.exists("build.json"):
+		try:
+			project.load_from_file("build.json")
+		except Exception, e:
+			print "Loading 'build.json' failed:", str(e)
+			exit(1)
+
+	try:
+		builder.build(project)
+	except Exception, e:
+		print "Building project failed:", str(e)
+

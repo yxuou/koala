@@ -8,13 +8,8 @@ class Builder(ReactiveObject):
 	def __init__(self):
 		super(Builder, self).__init__()
 
-		self.register_signal("build-started")
-		self.register_signal("build-finished")
-
-		# Use these ase default values
-		self.set_key("name", "a.out")
-		self.set_key("bin-dir", "./")
-		self.set_key("src-dir", "./")
+		self.register_signal("started")
+		self.register_signal("finished")
 
 	def set_compiler (self, compiler):
 		self.compiler = compiler
@@ -25,26 +20,13 @@ class Builder(ReactiveObject):
 
 		return self.compiler
 
-	def load_sources (self):
-		directory = self["src-dir"]
+	def build(self, project):
+		project.load_sources()
 
-		assert directory != None
-		assert os.path.isdir(directory)
+		self.emit_signal("started", project)
 
-		result = list_files(directory, extension=".vala")
-		assert len(result) > 0
+		compiler = self.get_compiler()
+		compiler.run(project)
 
-		self.set_key("src-files", result)
-
-	def build(self):
-		self.load_sources()
-
-		self.emit_signal("build-started")
-		try:
-			compiler = self.get_compiler()
-			compiler.run(self)
-		except Exception, e:
-			print "Error: Exception occured during compilation:", str(e)
-
-		self.emit_signal("build-finished")
+		self.emit_signal("finished")
 

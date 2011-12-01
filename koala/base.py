@@ -1,7 +1,7 @@
-
 class StoreObject(object):
 
 	def __init__(self):
+		super(StoreObject, self).__init__()
 		self.__data = {}
 
 	def set_key(self, key, value):
@@ -19,6 +19,9 @@ class StoreObject(object):
 	def clear(self):
 		self.__data = {}
 
+	def update(self, values):
+		self.__data.update(values)
+
 	def __getitem__(self, key):
 		return self.get_key(key)
 
@@ -34,7 +37,7 @@ class StoreObject(object):
 	def __iter__(self):
 		return iter(self.__data)
 
-class ReactiveObject(StoreObject):
+class ReactiveObject(object):
 	
 	def __init__(self):
 		super(ReactiveObject, self).__init__()
@@ -56,4 +59,3 @@ class ReactiveObject(StoreObject):
 				args_list.append(udata)
 
 			func(self, *tuple(args_list))
-

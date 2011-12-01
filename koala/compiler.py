@@ -9,22 +9,21 @@ class Compiler(ReactiveObject):
 	def __init__(self):
 		super(Compiler, self).__init__()
 
-		self.register_signal("compilation-started")
-		self.register_signal("compilation-finished")
-		self.register_signal("output-written")
+		self.register_signal("started")
+		self.register_signal("finished")
 
-	def run(self, properties):
-		self.emit_signal("compilation-started")
+	def run(self, project):
+		self.emit_signal("started")
 
 		if hasattr(self, "messages"):
 			self.messages.clear_messages()
 
 		if hasattr(self, "do_run"):
-			self.do_run(properties)
+			self.do_run(project)
 		else:
 			raise NotImplementedError()
 
-		self.emit_signal("compilation-finished")
+		self.emit_signal("finished")
 
 	def get_messages(self):
 		if not hasattr(self, "messages"):
@@ -35,12 +34,12 @@ class Compiler(ReactiveObject):
 	def has_errors(self):
 		raise NotImplementedError()
 
-class CompilerMessages(ReactiveObject):
+class CompilerMessages(StoreObject, ReactiveObject):
 
 	def __init__(self):
 		super(CompilerMessages, self).__init__()
 
-		self.register_signal("message-found")
+		self.register_signal("message")
 
 	def add_message(self, type, message):
 		if type in self:
@@ -48,7 +47,7 @@ class CompilerMessages(ReactiveObject):
 		else:
 			self[type] = [message]
 
-		self.emit_signal("message-found", message, type)
+		self.emit_signal("message", message, type)
 
 	def get_messages(self, type):
 		return self[type]
@@ -65,7 +64,7 @@ class ValaCompiler(Compiler):
 		"name"      : lambda s : "--output=%s" %(s),
 		"bin-dir"   : lambda s : "--directory=%s" %(s),
 		"packages"  : lambda l : ("--pkg=" + "\t--pkg=".join(l)).split('\t'),
-		"arguments" : lambda l : l
+		"arguments" : None
 	}
 
 	def __init__(self):
@@ -74,39 +73,40 @@ class ValaCompiler(Compiler):
 		self.messages = ValaCompilerMessages()
 		self.errors = False
 
-	def get_call(self, properties):
+	def get_call(self, project):
 		args = ["valac"]
 
-		for prop in properties:
-			argument = self.property_to_argument (prop, properties[prop])
+		for prop in project:
+			argument = self.property_to_argument (prop, project[prop])
 			if argument != None:
 				if type(argument) is list:
 					args.extend(argument)
 				else:
 					args.append(argument)
 
-		args.extend(properties["src-files"])
+		args.extend(project["src-files"])
 
 		return args
 
 	def property_to_argument (self, name, value):
 		if name in self.translator:
+			translator = self.translator[name]
+
+			if translator == None:
+				return value
+
 			return self.translator[name](value)
 
 		return None
 
-	def do_run(self, properties):
-		call = self.get_call(properties)
+	def do_run(self, project):
+		call = self.get_call(project)
 
 		proc = subprocess.Popen(call, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		proc.wait()
 
-		self.messages.add_messages (proc.stderr)
 		self.errors = (proc.returncode != 0)
-
-		if not self.errors:
-			path = os.path.join(properties["bin-dir"], properties["name"])
-			self.emit_signal("output-written", path)
+		self.messages.add_messages (proc.stderr)
 
 	def get_messages(self):
 		return self.messages

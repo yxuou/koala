@@ -1,15 +1,32 @@
 import json
+import os
 
-class ProjectFile(object):
+from koala.base import StoreObject
+from koala.util import list_files
 
-	def __init__(self, path="build.json"):
-		self.file = open(path)
-		self.json = json.load(self.file)
+class Project(StoreObject):
 
-	def __del__(self):
-		self.file.close()
+	Defaults = {
+		"name" : "a.out", 
+		"bin-dir" : "./", 
+		"src-dir" : "./"
+	}
 
-	def load_into(self, obj):
-		for attr in self.json:
-			obj[attr] = self.json[attr]
+	def __init__(self):
+		super(Project, self).__init__()
+
+		# Initialize default values
+		self.update(Project.Defaults)
+
+	def load_from_file(self, path):
+		file = open(path)
+		self.load_from_object(json.load(file))
+		file.close()
+
+	# Loads project fields from an object which supports access through keys
+	def load_from_object(self, object):
+		self.update(object)
+
+	def load_sources (self):
+		self["src-files"] = list_files(self["src-dir"], extension=".vala")
 

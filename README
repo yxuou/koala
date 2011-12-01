@@ -2,6 +2,11 @@ Koala is a small Python tool intended to help you build projects written in
 Vala. Koala's goal is to build your projects based on project information 
 specified in the JSON format. 
 
+How do I install Koala?
+
+Download the sources and place a link on the main.py file in 
+one of the directories listet in your $PATH variable.
+
 How do I use Koala?
 
 You place a 'build.json' file in your projects root directory, which may contain 
