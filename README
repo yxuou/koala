@@ -1,32 +1,38 @@
-Koala is a small Python tool intended to help you build projects written in 
-Vala. Koala's goal is to build your projects based on project information 
-specified in the JSON format. 
+Koala is a small build tool for Vala programs. It is written in Python and is 
+intended to help you build projects written in Vala without using Makefiles
+or build-systems like Automake or CMake. Koala's goal is to build your 
+projects based on project information specified in the JSON format. 
 
-How do I install Koala?
+  1.) How do you install Koala?
 
-Download the sources and place a link called 'koala' on the main.py file in one of the directories listet in your $PATH variable.
+Download the sources and place a link on the main.py file under the name 'koala'
+in one of the directories of your $PATH variable.
 
-How do I use Koala?
+  2.) How do you use Koala?
 
-You place a 'build.json' file in your projects root directory, which may contain 
-the following fields:
+First you create a 'build.json' file in your projects root directory, which may
+contain the fields:
 
-	name		the name of your project
-	src-dir		path to the directory containing the source files
-	bin-dir		path to the directory where the output should be written
-	packages	your included packages (array of strings)
-	arguments	additional arguments passed to valac
+  name        the name of your project
+  src-dir     path to the directory containing the source files
+  bin-dir     path to the directory where the output should be written
+  packages    your included packages (array of strings)
+  arguments   additional arguments passed to valac (array of strings)
 
 The following example shows the content of a simple  'build.json' file:
 
-	{
-		"name" : "my-project",
-		"src-dir" : "./src/",
-		"bin-dir" : "./bin/",
-		"packages"  : ["gtk+-3.0", "glib-2.0"],
-		"arguments" : ["-C"]
-	}
+{
+  "name" : "my-project",
+  "src-dir" : "./src/",
+  "bin-dir" : "./bin/",
+  "packages"  : ["gtk+-3.0", "glib-2.0"],
+  "arguments" : ["-C"]
+}
 
-Once you created a 'build.json' file, you call Koala from the project's root
-directory and it builds all your *.vala files in your source directory.
+Once you created a 'build.json' file, you call Koala and it builds your project
+based on your project definitions. If no 'build.json' file is given, it tries
+to build your program based on default values. This works as long as you have
+no additional package requirements.
 
+Tags: 
+	build-tool, builder, build-system, vala programing language
