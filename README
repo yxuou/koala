@@ -4,8 +4,7 @@ specified in the JSON format.
 
 How do I install Koala?
 
-Download the sources and place a link on the main.py file in 
-one of the directories listet in your $PATH variable.
+Download the sources and place a link called 'koala' on the main.py file in one of the directories listet in your $PATH variable.
 
 How do I use Koala?
 
