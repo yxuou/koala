@@ -1,11 +1,10 @@
 
-from koala.compiler import ValaCompiler, CompilerMessages
+from koala.compiler import ValaCompiler
 
 class MakefileCompiler(ValaCompiler):
 	
 	def __init__(self):
 		super(MakefileCompiler, self).__init__()
-		self.messages = CompilerMessages()
 
 	def do_run(self, properties):
 		call = self.get_call(properties)
@@ -13,6 +12,7 @@ class MakefileCompiler(ValaCompiler):
 		prog = call[0]
 		args = call[1:]
 
+		self.errors = False
 		try:
 			file = open("Makefile", "w")
 
@@ -27,16 +27,9 @@ class MakefileCompiler(ValaCompiler):
 				file.write("\t\t%s \\\n" %(arg))
 
 			file.close()
-
-		except IOError, e:
-			self.messages.add_message("error", "%s: %s" %(e.filename, e.strerror))
-			return
-		except Exception, e:
-			self.messages.add_message("error", str(e))
-			return
-
-		self.emit_signal("output-written", "Makefile")
-
+		except:
+			self.errors = True
+	
 	def has_errors(self):
-		return len(self.messages) != 0
+		return self.errors
 
