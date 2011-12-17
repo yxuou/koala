@@ -26,15 +26,18 @@ def on_build_started(builder, project, udata=None):
 	print "Building %s from source(s):" %(project["name"])
 	for file in project["src-files"]:
 		print " >", file
+	print ""
 
 def on_build_finished(builder, udata=None):
 	compiler = builder.get_compiler()
-	messages = compiler.get_messages()
 
-	for message_type in messages.get_types():
-		print "\nGot the following %s(s):" %(message_type)
-		for message in messages.get_messages(message_type):
-			print " >", message
+	try:
+		output = compiler.get_output()
+		for line in output:
+			print line.strip()
+		output.close()
+	except:
+		pass
 
 	if compiler.has_errors():
 		print "\nCompilation failed."
