@@ -6,7 +6,8 @@ projects based on project information specified in the JSON format.
   1.) How do you install Koala?
 
 Download the sources and place a link on the main.py file under the name 'koala'
-in one of the directories of your $PATH variable.
+in one of the directories listed in your $PATH variable. Furthermore make sure
+that the main.py file is executable (chmod +x it otherwise).
 
   2.) How do you use Koala?
 
