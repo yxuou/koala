@@ -17,15 +17,20 @@ First you create a 'build.json' file in your projects root directory, which may
 contain the fields:
 
 + `name`
-The name of your project
+
+	The name of your project
 + `src-dir`
-The path to the directory containing the source files
+
+	The path to the directory containing the source files
 + `bin-dir`
-The path to the directory where the output should be written
+
+	The path to the directory where the output should be written
 + `packages`
-A list of your included packages
+
+	A list of your included packages
 + `arguments`
-A list of additional arguments passed to valac
+
+	A list of additional arguments passed to valac
 
 The following example shows the content of a simple  'build.json' file:
 
