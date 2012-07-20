@@ -29,13 +29,15 @@ contain the fields:
 
 The following example shows the content of a simple  'build.json' file:
 
-	{
-	  "name" : "my-project",
-	  "src-dir" : "./src/",
-	  "bin-dir" : "./bin/",
-	  "packages"  : ["gtk+-3.0", "glib-2.0"],
-	  "arguments" : ["-C"]
-	}
+```json
+{
+  "name" : "my-project",
+  "src-dir" : "./src/",
+  "bin-dir" : "./bin/",
+  "packages"  : ["gtk+-3.0", "glib-2.0"],
+  "arguments" : ["-C"]
+}
+```
 
 Once you created a 'build.json' file, you call Koala and it builds your project
 based on your project definitions. If no 'build.json' file is given, it tries
